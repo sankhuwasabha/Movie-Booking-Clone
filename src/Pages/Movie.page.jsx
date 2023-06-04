@@ -1,0 +1,159 @@
+import React, { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import Slider from "react-slick";
+import PosterSlider from "../component/PosterSlider/PosterSlider.component";
+import MovieHero from "../component/MovieHero/MovieHero.component";
+
+// Importing layout
+import MovieLayout from "../Layout/Movie.layout";
+import { useParams } from "react-router-dom";
+import { MovieContext } from "../context/Movie.content";
+import { FaCcVisa, FaCcApplePay } from "react-icons/fa";
+
+const Moviepage = () => {
+  const { id } = useParams();
+  const { movie, setMovie } = useContext(MovieContext);
+
+  const [cast, setCast] = useState([]);
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
+
+  useEffect(() => {
+    const requestCast = async () => {
+      const getCast = await axios.get(`/movie/${id}/credits`);
+      setCast(getCast.data.cast);
+    };
+    requestCast();
+  }, [id]);
+
+  useEffect(() => {
+    const requestSimilarMovies = async () => {
+      const getSimilarMovies = await axios.get(`/movie/${id}/similar`);
+      setSimilarMovies(getSimilarMovies.data.results);
+    };
+    requestSimilarMovies();
+  }, [id]);
+
+  useEffect(() => {
+    const requestRecommendedMovies = async () => {
+      const getRecommendedMovies = await axios.get(
+        `/movie/${id}/recommendations`
+      );
+      setRecommendedMovies(getRecommendedMovies.data.results);
+    };
+    requestRecommendedMovies();
+  }, []);
+
+  useEffect(() => {
+    const requestMovie = async () => {
+      const getMovieData = await axios.get(`/movie/${id}`);
+      setMovie(getMovieData.data);
+    };
+    requestMovie();
+  }, [id]);
+
+  const settingCast = {
+    infinite: false,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 4,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+          initialSlide: 1,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          initialSlide: 1,
+        },
+      },
+      {
+        breakpoint: 400,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+
+  const settings = {};
+
+  return (
+    <>
+      <MovieHero />
+      <div className="my-12 container px-4 lg:ml-20 lg:w-2/1">
+        <div className="flex flex-col items-start gap-3">
+          <h1 className="text-gray-800 font-bold text-2xl">About the movie</h1>
+          <p>{movie.overview}</p>
+        </div>
+        <div className="my-8">
+          <hr></hr>
+        </div>
+        <div className="my-8">
+          <h2 className="text-gray-800 font-bold text-2xl my-3">Applicable offers</h2>
+          <div className="flex flex-col gap-3 lg:flex-row">
+            <div className="flex items-start gap-2 bg-yellow-100 p-3 border-yellow-400 border-dashed border-2 rounded-md">
+              <div className="w-8 h-8">
+                <FaCcVisa className="w-full h-full"></FaCcVisa>
+              </div>
+              <div className="flex flex-col items-sart">
+                <h3 className="text-gray-700 text-xl font-bold">Visa Stream Offer</h3>
+                <p className="">Get 50% up to NPR 150 on all Rupay cards on Book My Show Stream</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 bg-yellow-100 p-3 border-yellow-400 border-dashed border-2 rounded-md">
+              <div className="w-8 h-8">
+                <FaCcApplePay className="w-full h-full"></FaCcApplePay>
+              </div>
+              <div className="flex flex-col items-start">
+                <h3 className="text-gray-700 text-xl font-bold">Movie Pass</h3>
+                <p className="">Get 50% up to NPR 150 on all Rupay cards on Book My Show Stream</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Cast slider */}
+        <div className="my-8">
+          <hr></hr>
+        </div>
+
+        {/* Recommended movies slider */}
+        <div className="my-8">
+          <PosterSlider
+            config={settings}
+            title="Recommended Movies"
+            posters={recommendedMovies}
+            isDark={false}
+          />
+        </div>
+
+        {/* CityCentre exclusive movies slider */}
+        <div className="my-8">
+          <hr></hr>
+          <PosterSlider
+            config={settings}
+            title="CityCentre exclusive Movies"
+            posters={recommendedMovies}
+            isDark={false}
+          />
+        </div>
+
+        <div className="my-8">
+          <hr></hr>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default MovieLayout(Moviepage);
